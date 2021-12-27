@@ -1,0 +1,100 @@
+﻿@page "/counter"
+
+@using duckling_dota.Data
+@using duckling_dota.Data.Models
+@inject DucklingPointsService PointsService;
+
+<h1>Утята-дотеры</h1>
+
+@if (selectedDoter == null)
+{
+    @if (PointsService.doters == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <button @onclick="NewDuckling">Добавить утёнка</button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Dota Id</th>
+                    <th>Всего очков</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var doter in PointsService.doters)
+                {
+                <tr>
+                    <td>@doter.Name</td>
+                    <td>@doter.DotaId</td>
+                    <td><button @onclick="()=>SelectDuckling(doter)">Изменить данные</button></td>
+                    <td><button @onclick="()=>RemoveDuckling(doter)">Исключить утенка</button></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    @if (!@PointsService.doters.Contains(selectedDoter))
+    {
+        //New duckling!
+        <p>Новый утенок!</p>
+        <p>Имя утенка</p>
+        <input @bind-value="@selectedDoter.Name" />
+        <p>Dota Id</p>
+        <input @bind-value="@selectedDoter.DotaId" />
+        <button @onclick="AddNewDuckling">Создать!</button>
+    }
+    else
+    {
+        //Edit duckling!
+        <p>Редактировать данные утенка!</p>
+        <p>Имя утенка</p>
+        <input @bind-value="@selectedDoter.Name" />
+        <p>Dota Id</p>
+        <input @bind-value="@selectedDoter.DotaId" />
+        <button @onclick="EditDuckling">Изменить!</button>
+    }
+}
+
+@code {
+    private DucklingDoter selectedDoter = null;
+    protected override async Task OnInitializedAsync()
+    {
+        selectedDoter = null;
+        PointsService.GetAllDoters();
+    }
+    private void AddNewDuckling()
+    {
+        if (selectedDoter.Name != null && selectedDoter.DotaId != null)
+        {
+            PointsService.AddDoter(selectedDoter);
+            selectedDoter = null;
+        }
+    }
+    private void EditDuckling()
+    {
+        if (selectedDoter.Name != null && selectedDoter.DotaId != null)
+        {
+            PointsService.EditDoter(selectedDoter);
+            selectedDoter = null;
+        }
+    }
+    private void RemoveDuckling(DucklingDoter ducklingDoter)
+    {
+            PointsService.RemoveDoter(ducklingDoter);
+            selectedDoter = null;
+    }
+    private void SelectDuckling(DucklingDoter newSelection)
+    {
+        selectedDoter = newSelection;
+    }
+    private void NewDuckling()
+    {
+        selectedDoter = new DucklingDoter();
+    }
+}

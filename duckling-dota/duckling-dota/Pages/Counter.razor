@@ -14,24 +14,33 @@
     }
     else
     {
-        <button @onclick="NewDuckling">Добавить утёнка</button>
+        <input value="@OfficerPassword"
+               @oninput="(e)=> OfficerPassword = e.Value.ToString()" type="password" placeholder="Пароль офицера"/>
+        <br />
+        <br />
+        @if (OfficerPassword.Equals(DucklingPointsService.OfficerPassword))
+        {
+            <button @onclick="NewDuckling">Добавить утёнка</button>
+        }
         <table class="table">
             <thead>
                 <tr>
                     <th>Имя</th>
                     <th>Dota Id</th>
-                    <th>Всего очков</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var doter in PointsService.doters)
                 {
-                <tr>
-                    <td>@doter.Name</td>
-                    <td>@doter.DotaId</td>
-                    <td><button @onclick="()=>SelectDuckling(doter)">Изменить данные</button></td>
-                    <td><button @onclick="()=>RemoveDuckling(doter)">Исключить утенка</button></td>
-                </tr>
+                    <tr>
+                        <td>@doter.Name</td>
+                        <td>@doter.DotaId</td>
+                        @if (OfficerPassword.Equals(DucklingPointsService.OfficerPassword))
+                        {
+                            <td><button @onclick="() => SelectDuckling(doter)">Изменить данные</button></td>
+                            <td><button @onclick="() => RemoveDuckling(doter)">Исключить утенка</button></td>
+                        }
+                    </tr>
                 }
             </tbody>
         </table>
@@ -63,6 +72,8 @@ else
 
 @code {
     private DucklingDoter selectedDoter = null;
+    private string OfficerPassword = String.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         selectedDoter = null;
@@ -86,8 +97,8 @@ else
     }
     private void RemoveDuckling(DucklingDoter ducklingDoter)
     {
-            PointsService.RemoveDoter(ducklingDoter);
-            selectedDoter = null;
+        PointsService.RemoveDoter(ducklingDoter);
+        selectedDoter = null;
     }
     private void SelectDuckling(DucklingDoter newSelection)
     {

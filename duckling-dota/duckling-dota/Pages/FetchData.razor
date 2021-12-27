@@ -6,60 +6,73 @@
 
 <h1>Подсчёт утиных очков: Dota 2 - разрядизация @DucklingPointsService.TierDate</h1>
 <p>Запросы ограничены - 50000/месяц. Для защиты от перегрева АПИ подсчёт очков доступен только офицерам.</p>
+<input value="@OfficerPassword"
+       @oninput="(e)=> OfficerPassword = e.Value.ToString()" type="password" placeholder="Пароль офицера"/>
 @if (PointsService.doters == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Имя</th>
-                <th>Dota Id</th>
-                <th>Пати: 2 утенка</th>
-                <th>Пати: 3 утенка</th>
-                <th>Пати: 4 утенка</th>
-                <th>Пати: 5 утят</th>
-                <th>Всего очков</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var doter in PointsService.doters)
-            {
+    @if (OfficerPassword.Equals(DucklingPointsService.OfficerPassword))
+    {
+        <br/>
+        <br/>
+        <button @onclick="FetchDucklingData">Рассчитать утиные очки текущей разрядизации</button>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@doter.Name</td>
-                    <td>@doter.DotaId</td>
-
-                    @if (PointsService.playerResults.FirstOrDefault(x => x.player == doter) != null)
-                    {
-                        <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).DuoGames</td>
-                        <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).TrioGames</td>
-                        <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).QuoGames</td>
-                        <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).PentaGames</td>
-                        <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).SumGames</td>
-                    }
+                    <th>Имя</th>
+                    <th>Dota Id</th>
+                    <th>Пати: 2 утенка</th>
+                    <th>Пати: 3 утенка</th>
+                    <th>Пати: 4 утенка</th>
+                    <th>Пати: 5 утят</th>
+                    <th>Всего очков</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var doter in PointsService.doters)
+                {
+                    <tr>
+                        <td>@doter.Name</td>
+                        <td>@doter.DotaId</td>
+
+                        @if (PointsService.playerResults.FirstOrDefault(x => x.player == doter) != null)
+                        {
+                            <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).DuoGames</td>
+                            <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).TrioGames</td>
+                            <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).QuoGames</td>
+                            <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).PentaGames</td>
+                            <td>@PointsService.playerResults.FirstOrDefault(x => x.player == doter).SumGames</td>
+                        }
+                    </tr>
+                }
+
+
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Введите пароль офицера.</p>
+    }
 }
 
 @code {
     PlayerResults cacheResult = null;
+    private string OfficerPassword = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-
         PointsService.GetAllDoters();
-        foreach(var doter in PointsService.doters)
+    }
+    private void FetchDucklingData()
+    {
+        foreach (var doter in PointsService.doters)
         {
             PointsService.CountPointsForPlayer(doter);
         }
-
-    }
-    private void CacheResult(DucklingDoter doter)
-    {
-        cacheResult = PointsService.playerResults.First(x => x.player == doter);
+        PointsService.GetAllDoters();
     }
 }
